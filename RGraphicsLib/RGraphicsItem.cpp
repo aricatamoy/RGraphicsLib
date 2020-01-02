@@ -9,9 +9,13 @@
 class RGrapihcsItemPrivate
 {
 	friend class RGrapihcsItem;
-	bool bMovable = true;
-	bool bLimitedInRect = false;
-	QRectF rectLimited;
+
+private:
+	float fHitTestBorder = 3.0f;				// 边缘测试的边界
+	bool bMovable = true;						// 是否允许移动
+	bool bLimitedInRect = false;				// 是否限制在指定的限制框中，未指定框则默认是所属 scene 的 sceneRect
+	QRectF rectLimited;							// 指定的限制框
+	CustomPaintingFunc funcCustomPainting = &RGrapihcsItem::defaultPaintingFunc;		// 选中状态绘制函数
 };
 
 QMap<int, int> RGrapihcsItem::scMapBorderAreaCursor = QMap<int, int>(std::initializer_list<std::pair<int, int> >({
@@ -73,15 +77,31 @@ RGrapihcsItem::~RGrapihcsItem()
 	delete &m;
 }
 
-void RGrapihcsItem::setActualRect(QRectF rect)
+void RGrapihcsItem::setActualRect(QRectF rect, bool bModifyRect /* = true*/)
 {
-	setPos(rect.topLeft());
-	setRect(QRectF(QPointF(0, 0), rect.size()));
+	if (bModifyRect)
+	{
+		rect.translate(QPointF(-pos().x(), -pos().y()));
+		setRect(rect);
+	}
+	else
+	{
+		Q_ASSERT(rect.size() == this->rect().size());
+		QPointF ptPosition =  rect.topLeft() - this->rect().topLeft();
+		setPos(ptPosition);
+	}
 }
 
 QRectF RGrapihcsItem::actualRect() const
 {
-	return QRectF(pos(), rect().size());
+	QRectF rectActual = rect();
+	rectActual.translate(pos());
+	return rectActual;
+}
+
+void RGrapihcsItem::setHitTestBorder(float fBorder)
+{
+	m.fHitTestBorder = fBorder;
 }
 
 void RGrapihcsItem::setItemMovable(bool bMovable)
@@ -104,6 +124,11 @@ void RGrapihcsItem::setItemLimitedInRect(QRectF rect, bool bLimited /*= true*/)
 	}
 }
 
+void RGrapihcsItem::setSelectedStatePaintingFunction(CustomPaintingFunc funPainting)
+{
+	m.funcCustomPainting = funPainting;
+}
+
 QVariant RGrapihcsItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value)
 {
 	if (change == ItemPositionHasChanged && scene())
@@ -120,13 +145,14 @@ QVariant RGrapihcsItem::itemChange(QGraphicsItem::GraphicsItemChange change, con
 
 void RGrapihcsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-	setCursor((Qt::CursorShape)scMapBorderAreaCursor.value(borderAreaHitTest(event->pos())));
+	setCursor((Qt::CursorShape)scMapBorderAreaCursor.value(borderAreaHitTest(event->scenePos())));
 	if (isSelected())
 	{
-		m_nLastBorderArea = borderAreaHitTest(event->lastPos());
-		m_ptLastPosition = event->lastPos();
+		m_nLastBorderArea = borderAreaHitTest(event->scenePos());
+		m_ptLastPosition = event->scenePos();
 		setFlag(ItemIsMovable, false);
 	}
+	grabMouse();
 	return QGraphicsRectItem::mousePressEvent(event);
 }
 
@@ -222,7 +248,6 @@ void RGrapihcsItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	case kBorderAreaCenter:
 	{
 		setFlag(ItemIsMovable, m.bMovable);
-
 	}
 
 	default:
@@ -233,7 +258,6 @@ void RGrapihcsItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	QRectF rectLimited = limitedRect();
 	if (m.bLimitedInRect && !rectLimited.isNull())
 	{
-		
 		QRectF rectActual = actualRect();
 		if (rectActual.right() > rectLimited.right())
 		{
@@ -252,7 +276,7 @@ void RGrapihcsItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 		{
 			rectActual.moveBottom(rectLimited.bottom());
 		}
-		setActualRect(rectActual);
+		setActualRect(rectActual, false);
 	}
 	 
 }
@@ -261,6 +285,7 @@ void RGrapihcsItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
 	m_nLastBorderArea = kBorderAreaCenter;
 	m_ptLastPosition = QPointF(0, 0);
+	ungrabMouse();
 	return QGraphicsRectItem::mouseReleaseEvent(event);
 }
 
@@ -268,7 +293,7 @@ void RGrapihcsItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
 	if (this->isSelected())
 	{
-		QPointF ptCursor = event->lastPos();
+		QPointF ptCursor = event->scenePos();
 		setCursor((Qt::CursorShape)scMapBorderAreaCursor.value(borderAreaHitTest(ptCursor)));
 	}
 	return QGraphicsRectItem::hoverMoveEvent(event);
@@ -276,25 +301,40 @@ void RGrapihcsItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 
 void RGrapihcsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
-	// 不绘制原有的选中状态
-	QStyleOptionGraphicsItem paintOption = *option;
-	paintOption.state &= ~QStyle::State_Selected;
-	QGraphicsRectItem::paint(painter, &paintOption, widget);
-
-	// 绘制自定义选中状态
-	if (QStyle::State_Selected & option->state)
+	if (m.funcCustomPainting != nullptr)
 	{
-		painter->fillRect(option->rect, QBrush(QColor("#1fff0000")));
+		// 不绘制原有的选中状态
+		QStyleOptionGraphicsItem paintOption = *option;
+		paintOption.state &= ~QStyle::State_Selected;
+		QGraphicsRectItem::paint(painter, &paintOption, widget);
+
+		// 绘制自定义选中状态
+		if (QStyle::State_Selected & option->state)
+		{
+			m.funcCustomPainting(painter, option->rect);
+		}
+	}
+	else
+	{
+		return QGraphicsRectItem::paint(painter, option, widget);
 	}
 }
 
-int RGrapihcsItem::borderAreaHitTest(QPointF pt, float fBorder /*= 3*/)
+void RGrapihcsItem::defaultPaintingFunc(QPainter* painter, QRectF rect)
+{
+	painter->fillRect(rect, QBrush(QColor("#1fff0000")));
+}
+
+int RGrapihcsItem::borderAreaHitTest(QPointF pt)
 {
 	int nBorderArea = kBorderAreaCenter;
-	bool bTriggerLeft = (pt.x() - 0 < fBorder);
-	bool bTriggerTop = (pt.y() - 0 < fBorder);
-	bool bTriggerRight = (rect().width() - pt.x() < fBorder);
-	bool bTriggerBottom = (rect().height() - pt.y() < fBorder);
+	QRectF rectActual = actualRect();
+
+	float fBorder = m.fHitTestBorder;
+	bool bTriggerLeft = (pt.x() - rectActual.left() < fBorder);
+	bool bTriggerTop = (pt.y() - rectActual.top() < fBorder);
+	bool bTriggerRight = (rectActual.right() - pt.x() < fBorder);
+	bool bTriggerBottom = (rectActual.bottom() - pt.y() < fBorder);
 
 	if (bTriggerTop && bTriggerLeft) {
 		nBorderArea = kBorderAreaTopLeft;

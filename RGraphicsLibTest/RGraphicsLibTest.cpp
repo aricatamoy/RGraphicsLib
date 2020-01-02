@@ -16,5 +16,15 @@ RGraphicsLibTest::RGraphicsLibTest(QWidget *parent)
 	pItem->setItemLimitedInScene(true);
 	m_pScene->addItem(pItem);
 
+	{
+		RGrapihcsItem* pItem = new RGrapihcsItem(nullptr);
+		pItem->setRect(300, 300, 50, 50);
+		pItem->setPen(QColor("#eee"));
+		pItem->setBrush(QColor("#eee"));
+		pItem->setItemLimitedInScene(true);
+		m_pScene->addItem(pItem);
+	}
+
+
 	m_pScene->setSceneRect(0, 0, 500, 500);
 }

@@ -2,6 +2,8 @@
 #include <QGraphicsRectItem>
 #include "rgraphicslib_global.h"
 
+typedef void(*CustomPaintingFunc)(QPainter* painter, QRectF rect);
+
 class RGrapihcsItemPrivate;
 class RGRAPHICSLIB_EXPORT RGrapihcsItem : public QObject, public QGraphicsRectItem
 {
@@ -23,12 +25,17 @@ public:
 	RGrapihcsItem(QGraphicsItem* parent);
 	~RGrapihcsItem();
 
-	void setActualRect(QRectF rect);
+	static void defaultPaintingFunc(QPainter* painter, QRectF rect);
+
+
+	void setActualRect(QRectF rect, bool bModifyRect = true);
 	QRectF actualRect() const;
 
+	void setHitTestBorder(float fBorder);
 	void setItemMovable(bool bMovable);
 	void setItemLimitedInScene(bool bLimitedInScene);
 	void setItemLimitedInRect(QRectF rect, bool bLimited = true);
+	void setSelectedStatePaintingFunction(CustomPaintingFunc funPainting);
 
 protected:
 	virtual QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value) override;
@@ -42,7 +49,7 @@ signals:
 	void signalGeometryChanged(QRectF rect);
 
 private:
-	int borderAreaHitTest(QPointF pt, float fBorder = 3);
+	int borderAreaHitTest(QPointF pt);
 	static QMap<int, int> scMapBorderAreaCursor;
 	bool isXValid(float fX) const;
 	bool isYValid(float fY) const;
