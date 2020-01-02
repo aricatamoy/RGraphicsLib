@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.960
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RGraphicsLib", "RGraphicsLib\RGraphicsLib.vcxproj", "{B12702AD-ABFB-343A-A199-8E24837244A3}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RGraphicsLibTest", "RGraphicsLibTest\RGraphicsLibTest.vcxproj", "{D5139EDA-FB1E-410F-8815-09608DCDDF54}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|x86.ActiveCfg = Debug|Win32
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Debug|x86.Build.0 = Debug|Win32
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x86.ActiveCfg = Release|Win32
+		{B12702AD-ABFB-343A-A199-8E24837244A3}.Release|x86.Build.0 = Release|Win32
+		{D5139EDA-FB1E-410F-8815-09608DCDDF54}.Debug|x86.ActiveCfg = Debug|Win32
+		{D5139EDA-FB1E-410F-8815-09608DCDDF54}.Debug|x86.Build.0 = Debug|Win32
+		{D5139EDA-FB1E-410F-8815-09608DCDDF54}.Release|x86.ActiveCfg = Release|Win32
+		{D5139EDA-FB1E-410F-8815-09608DCDDF54}.Release|x86.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4E847573-F536-4459-8945-894434B3F54E}
+	EndGlobalSection
+EndGlobal
