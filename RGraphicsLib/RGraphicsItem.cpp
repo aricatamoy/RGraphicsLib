@@ -296,7 +296,7 @@ void RGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
 
 int RGraphicsItem::type() const
 {
-	return kType;
+	return Type;
 }
 
 void RGraphicsItem::defaultPaintingFunc(QPainter* painter, QRectF rect)

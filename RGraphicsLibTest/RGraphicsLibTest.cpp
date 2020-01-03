@@ -2,6 +2,7 @@
 #include "RGraphicsItem.h"
 #include "RectItemWidget.h"
 #include "IRItemWidget.h"
+#include <QDebug>
 
 RGraphicsLibTest::RGraphicsLibTest(QWidget *parent)
 	: QMainWindow(parent)
@@ -47,7 +48,7 @@ void RGraphicsLibTest::slotSelectionChanged()
 		QWidget* pWidget = m_mapTypePage.value(pItem->type(), m_pEmptyPage);
 		ui.stackedWidget->setCurrentWidget(pWidget);
 
-		RGraphicsItem* pRectItem = dynamic_cast<RGraphicsItem*>(pItem);
+		RGraphicsItem* pRectItem = qgraphicsitem_cast<RGraphicsItem*>(pItem);
 		IRItemWidget* pItemWidget = dynamic_cast<IRItemWidget*>(pWidget);
 		if (pRectItem && pItemWidget)
 		{

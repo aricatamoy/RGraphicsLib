@@ -27,8 +27,8 @@ public:
 
 	static void defaultPaintingFunc(QPainter* painter, QRectF rect);
 
-	enum { kType = RGraphicsItem::UserType + 1 };
-	int type() const;
+	enum { Type = RGraphicsItem::UserType + 1 };
+	virtual int type() const override;
 
 	void setActualRect(QRectF rect, bool bModifyRect = true);
 	QRectF actualRect() const;
