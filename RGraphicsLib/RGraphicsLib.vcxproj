@@ -92,6 +92,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="IRData.cpp" />
+    <ClCompile Include="IRItemWidget.cpp" />
     <ClCompile Include="RGraphicsItem.cpp" />
     <ClCompile Include="RGraphicsLib.cpp" />
     <ClCompile Include="RGraphicsScene.cpp" />
@@ -100,6 +101,7 @@
   <ItemGroup>
     <ClInclude Include="include\IRData.h" />
     <QtMoc Include="include\RGraphicsItem.h" />
+    <QtMoc Include="include\IRItemWidget.h" />
     <ClInclude Include="include\RGraphicsLib.h" />
     <ClInclude Include="include\rgraphicslib_global.h" />
     <QtMoc Include="include\RGraphicsView.h" />

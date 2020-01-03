@@ -12,18 +12,18 @@ public:
 	~RGraphicsScene();
 
 	template<class T>
-	QList<T> items(Qt::SortOrder order = Qt::DescendingOrder) const;
+	QList<T> customItems(Qt::SortOrder order = Qt::DescendingOrder) const;
 
 	template<class T>
-	QList<T> selectedItems() const;
+	QList<T> selectedCustomItems() const;
 };
 
 template<class T>
 QList<T>
-RGraphicsScene::items(Qt::SortOrder order /*= Qt::DescendingOrder*/) const
+RGraphicsScene::customItems(Qt::SortOrder order /*= Qt::DescendingOrder*/) const
 {
 	QList<T> listItems;
-	Q_FOREACH(QGraphicsItem* pItem, items(order))
+	Q_FOREACH(QGraphicsItem* pItem, customItems(order))
 	{
 		T* pCastedItem = dynamic_cast<T>(pItem);
 		if (pCastedItem)
@@ -36,10 +36,10 @@ RGraphicsScene::items(Qt::SortOrder order /*= Qt::DescendingOrder*/) const
 
 template<class T>
 QList<T>
-RGraphicsScene::selectedItems() const
+RGraphicsScene::selectedCustomItems() const
 {
 	QList<T> listItems;
-	Q_FOREACH(QGraphicsItem* pItem, selectedItems())
+	Q_FOREACH(QGraphicsItem* pItem, selectedCustomItems())
 	{
 		T* pCastedItem = dynamic_cast<T>(pItem);
 		if (pCastedItem)

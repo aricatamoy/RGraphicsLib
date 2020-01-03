@@ -8,17 +8,17 @@
 
 class RGrapihcsItemPrivate
 {
-	friend class RGrapihcsItem;
+	friend class RGraphicsItem;
 
 private:
 	float fHitTestBorder = 3.0f;				// 边缘测试的边界
 	bool bMovable = true;						// 是否允许移动
 	bool bLimitedInRect = false;				// 是否限制在指定的限制框中，未指定框则默认是所属 scene 的 sceneRect
 	QRectF rectLimited;							// 指定的限制框
-	CustomPaintingFunc funcCustomPainting = &RGrapihcsItem::defaultPaintingFunc;		// 选中状态绘制函数
+	CustomPaintingFunc funcCustomPainting = &RGraphicsItem::defaultPaintingFunc;		// 选中状态绘制函数
 };
 
-QMap<int, int> RGrapihcsItem::scMapBorderAreaCursor = QMap<int, int>(std::initializer_list<std::pair<int, int> >({
+QMap<int, int> RGraphicsItem::scMapBorderAreaCursor = QMap<int, int>(std::initializer_list<std::pair<int, int> >({
 		std::make_pair(kBorderAreaCenter, Qt::SizeAllCursor),
 		std::make_pair(kBorderAreaLeft, Qt::SizeHorCursor),
 		std::make_pair(kBorderAreaTop, Qt::SizeVerCursor),
@@ -30,7 +30,7 @@ QMap<int, int> RGrapihcsItem::scMapBorderAreaCursor = QMap<int, int>(std::initia
 		std::make_pair(kBorderAreaBottomRight, Qt::SizeFDiagCursor)
 	}));
 
-bool RGrapihcsItem::isXValid(float fX) const
+bool RGraphicsItem::isXValid(float fX) const
 {
 	bool bValid = true;
 	QRectF rectLimited = limitedRect();
@@ -41,7 +41,7 @@ bool RGrapihcsItem::isXValid(float fX) const
 	return bValid;
 }
 
-bool RGrapihcsItem::isYValid(float fY) const
+bool RGraphicsItem::isYValid(float fY) const
 {
 	bool bValid = true;
 	QRectF rectLimited = limitedRect();
@@ -52,7 +52,7 @@ bool RGrapihcsItem::isYValid(float fY) const
 	return bValid;
 }
 
-QRectF RGrapihcsItem::limitedRect() const
+QRectF RGraphicsItem::limitedRect() const
 {
 	QRectF rectLimited = m.rectLimited;
 	if (rectLimited.isNull() && scene())
@@ -62,7 +62,7 @@ QRectF RGrapihcsItem::limitedRect() const
 	return rectLimited;
 }
 
-RGrapihcsItem::RGrapihcsItem(QGraphicsItem* parent)
+RGraphicsItem::RGraphicsItem(QGraphicsItem* parent)
 	: QObject(nullptr)
 	, QGraphicsRectItem(parent)
 	, m(*new RGrapihcsItemPrivate)
@@ -72,50 +72,72 @@ RGrapihcsItem::RGrapihcsItem(QGraphicsItem* parent)
 	setAcceptHoverEvents(true);
 }
 
-RGrapihcsItem::~RGrapihcsItem()
+RGraphicsItem::~RGraphicsItem()
 {
 	delete &m;
 }
 
-void RGrapihcsItem::setActualRect(QRectF rect, bool bModifyRect /* = true*/)
+void RGraphicsItem::setActualRect(QRectF rect, bool bModifySize /* = true*/)
 {
-	if (bModifyRect)
+	//  修改尺寸
+	if (bModifySize)
 	{
+		if (m.bLimitedInRect)
+		{
+			QRectF rectLimited = limitedRect();
+			rect.setLeft(qMax(rect.left(), rectLimited.left()));
+			rect.setRight(qMin(rect.right(), rectLimited.right()));
+			rect.setTop(qMax(rect.top(), rectLimited.top()));
+			rect.setBottom(qMin(rect.bottom(), rectLimited.bottom()));
+		}
+
 		rect.translate(QPointF(-pos().x(), -pos().y()));
 		setRect(rect);
 	}
+	// 修改位移
 	else
 	{
+		if (m.bLimitedInRect)
+		{
+			QRectF rectLimited = limitedRect();
+			rect.moveLeft(qMax(rect.left(), rectLimited.left()));
+			rect.moveRight(qMin(rect.right(), rectLimited.right()));
+			rect.moveTop(qMax(rect.top(), rectLimited.top()));
+			rect.moveBottom(qMin(rect.bottom(), rectLimited.bottom()));
+		}
+
 		Q_ASSERT(rect.size() == this->rect().size());
 		QPointF ptPosition =  rect.topLeft() - this->rect().topLeft();
 		setPos(ptPosition);
 	}
+
+	emit signalGeometryChanged(rect);
 }
 
-QRectF RGrapihcsItem::actualRect() const
+QRectF RGraphicsItem::actualRect() const
 {
 	QRectF rectActual = rect();
 	rectActual.translate(pos());
 	return rectActual;
 }
 
-void RGrapihcsItem::setHitTestBorder(float fBorder)
+void RGraphicsItem::setHitTestBorder(float fBorder)
 {
 	m.fHitTestBorder = fBorder;
 }
 
-void RGrapihcsItem::setItemMovable(bool bMovable)
+void RGraphicsItem::setItemMovable(bool bMovable)
 {
 	m.bMovable = bMovable;
 }
 
-void RGrapihcsItem::setItemLimitedInScene(bool bLimitedInScene)
+void RGraphicsItem::setItemLimitedInScene(bool bLimitedInScene)
 {
 	m.bLimitedInRect = bLimitedInScene;
 	m.rectLimited = QRectF();
 }
 
-void RGrapihcsItem::setItemLimitedInRect(QRectF rect, bool bLimited /*= true*/)
+void RGraphicsItem::setItemLimitedInRect(QRectF rect, bool bLimited /*= true*/)
 {
 	m.bLimitedInRect = bLimited;
 	if (!bLimited)
@@ -124,18 +146,19 @@ void RGrapihcsItem::setItemLimitedInRect(QRectF rect, bool bLimited /*= true*/)
 	}
 }
 
-void RGrapihcsItem::setSelectedStatePaintingFunction(CustomPaintingFunc funPainting)
+void RGraphicsItem::setSelectedStatePaintingFunction(CustomPaintingFunc funPainting)
 {
 	m.funcCustomPainting = funPainting;
 }
 
-QVariant RGrapihcsItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value)
+QVariant RGraphicsItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant &value)
 {
-	if (change == ItemPositionHasChanged && scene())
-	{
-		emit signalGeometryChanged(actualRect());
-	}
-	else if (change == ItemSelectedHasChanged && !isSelected())
+	/*	if (change == ItemPositionHasChanged && scene())
+		{
+			emit signalGeometryChanged(actualRect());
+		}
+		else*/
+	if (change == ItemSelectedHasChanged && !isSelected())
 	{
 		setCursor(Qt::PointingHandCursor);
 	}
@@ -143,7 +166,7 @@ QVariant RGrapihcsItem::itemChange(QGraphicsItem::GraphicsItemChange change, con
 	return QGraphicsRectItem::itemChange(change, value);
 }
 
-void RGrapihcsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
+void RGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
 	setCursor((Qt::CursorShape)scMapBorderAreaCursor.value(borderAreaHitTest(event->scenePos())));
 	if (isSelected())
@@ -156,7 +179,7 @@ void RGrapihcsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 	return QGraphicsRectItem::mousePressEvent(event);
 }
 
-void RGrapihcsItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
+void RGraphicsItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
 	setFlag(ItemIsMovable, false);
 	QRectF rectActual = actualRect();
@@ -165,84 +188,56 @@ void RGrapihcsItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	{
 	case kBorderAreaTop:
 	{
-		if (event->scenePos().y() < rectActual.bottom() && isYValid(event->scenePos().y()))
-		{
-			rectActual.setTop(event->scenePos().y());
-			setActualRect(rectActual);
-		}
+		rectActual.setTop(event->scenePos().y());
+		setActualRect(rectActual);
 		break;
 	}
 	case kBorderAreaBottom:
 	{
-		if (event->scenePos().y() > rectActual.top() && isYValid(event->scenePos().y()))
-		{
-			rectActual.setBottom(event->scenePos().y());
-			setActualRect(rectActual);
-		}
+		rectActual.setBottom(event->scenePos().y());
+		setActualRect(rectActual);
 		break;
 	}
 
 	case kBorderAreaLeft:
 	{
-		if (event->scenePos().x() < rectActual.right() && isXValid(event->scenePos().x()))
-		{
-			rectActual.setLeft(event->scenePos().x());
-			setActualRect(rectActual);
-		}
+		rectActual.setLeft(event->scenePos().x());
+		setActualRect(rectActual);
 		break;
 	}
 	case kBorderAreaRight:
 	{
-		if (event->scenePos().x() > rectActual.left() && isXValid(event->scenePos().x()))
-		{
-			rectActual.setRight(event->scenePos().x());
-			setActualRect(rectActual);
-		}
+		rectActual.setRight(event->scenePos().x());
+		setActualRect(rectActual);
 		break;
 	}
 
 	case kBorderAreaTopLeft:
 	{
-		if (event->scenePos().x() < rectActual.right() && event->scenePos().y() < rectActual.bottom()
-			&& isYValid(event->scenePos().y()) && isXValid(event->scenePos().x()))
-		{
-			rectActual.setLeft(event->scenePos().x());
-			rectActual.setTop(event->scenePos().y());
-			setActualRect(rectActual);
-		}
+		rectActual.setLeft(event->scenePos().x());
+		rectActual.setTop(event->scenePos().y());
+		setActualRect(rectActual);
 		break;
 	}
 	case kBorderAreaTopRight:
 	{
-		if (event->scenePos().x() > rectActual.left() && event->scenePos().y() < rectActual.bottom()
-			&& isYValid(event->scenePos().y()) && isXValid(event->scenePos().x()))
-		{
-			rectActual.setRight(event->scenePos().x());
-			rectActual.setTop(event->scenePos().y());
-			setActualRect(rectActual);
-		}
+		rectActual.setRight(event->scenePos().x());
+		rectActual.setTop(event->scenePos().y());
+		setActualRect(rectActual);
 		break;
 	}
 	case kBorderAreaBottomLeft:
 	{
-		if (event->scenePos().x() < rectActual.right() && event->scenePos().y() > rectActual.top()
-			&& isYValid(event->scenePos().y()) && isXValid(event->scenePos().x()))
-		{
-			rectActual.setLeft(event->scenePos().x());
-			rectActual.setBottom(event->scenePos().y());
-			setActualRect(rectActual);
-		}
+		rectActual.setLeft(event->scenePos().x());
+		rectActual.setBottom(event->scenePos().y());
+		setActualRect(rectActual);
 		break;
 	}
 	case kBorderAreaBottomRight:
 	{
-		if (event->scenePos().x() > rectActual.left() && event->scenePos().y() > rectActual.top()
-			&& isYValid(event->scenePos().y()) && isXValid(event->scenePos().x()))
-		{
-			rectActual.setRight(event->scenePos().x());
-			rectActual.setBottom(event->scenePos().y());
-			setActualRect(rectActual);
-		}
+		rectActual.setRight(event->scenePos().x());
+		rectActual.setBottom(event->scenePos().y());
+		setActualRect(rectActual);
 		break;
 	}
 	case kBorderAreaCenter:
@@ -255,33 +250,12 @@ void RGrapihcsItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 	}
 	QGraphicsRectItem::mouseMoveEvent(event);
 
-	QRectF rectLimited = limitedRect();
-	if (m.bLimitedInRect && !rectLimited.isNull())
-	{
-		QRectF rectActual = actualRect();
-		if (rectActual.right() > rectLimited.right())
-		{
-			rectActual.moveRight(rectLimited.right());
-		}
-		else if (rectActual.left() < rectLimited.left())
-		{
-			rectActual.moveLeft(rectLimited.left());
-		}
-
-		if (rectActual.top() < rectLimited.top())
-		{
-			rectActual.moveTop(rectLimited.top());
-		}
-		else if (rectActual.bottom() > rectLimited.bottom())
-		{
-			rectActual.moveBottom(rectLimited.bottom());
-		}
-		setActualRect(rectActual, false);
-	}
-	 
+	// 移动后重新设置以校验边界值
+	QRectF rectMoved = actualRect();
+	setActualRect(rectMoved, false);
 }
 
-void RGrapihcsItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
+void RGraphicsItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
 	m_nLastBorderArea = kBorderAreaCenter;
 	m_ptLastPosition = QPointF(0, 0);
@@ -289,7 +263,7 @@ void RGrapihcsItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 	return QGraphicsRectItem::mouseReleaseEvent(event);
 }
 
-void RGrapihcsItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
+void RGraphicsItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 {
 	if (this->isSelected())
 	{
@@ -299,7 +273,7 @@ void RGrapihcsItem::hoverMoveEvent(QGraphicsSceneHoverEvent *event)
 	return QGraphicsRectItem::hoverMoveEvent(event);
 }
 
-void RGrapihcsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
+void RGraphicsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
 	if (m.funcCustomPainting != nullptr)
 	{
@@ -320,12 +294,17 @@ void RGrapihcsItem::paint(QPainter *painter, const QStyleOptionGraphicsItem *opt
 	}
 }
 
-void RGrapihcsItem::defaultPaintingFunc(QPainter* painter, QRectF rect)
+int RGraphicsItem::type() const
+{
+	return kType;
+}
+
+void RGraphicsItem::defaultPaintingFunc(QPainter* painter, QRectF rect)
 {
 	painter->fillRect(rect, QBrush(QColor("#1fff0000")));
 }
 
-int RGrapihcsItem::borderAreaHitTest(QPointF pt)
+int RGraphicsItem::borderAreaHitTest(QPointF pt)
 {
 	int nBorderArea = kBorderAreaCenter;
 	QRectF rectActual = actualRect();

@@ -67,7 +67,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <AdditionalIncludeDirectories>../RGraphicsLib/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>../RGraphicsLib/include;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -90,12 +90,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="RectItemWidget.cpp" />
     <ClCompile Include="RGraphicsLibTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="RGraphicsLibTest.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="RectItemWidget.ui" />
     <QtUic Include="RGraphicsLibTest.ui" />
   </ItemGroup>
   <ItemGroup>
@@ -105,6 +107,9 @@
     <ProjectReference Include="..\RGraphicsLib\RGraphicsLib.vcxproj">
       <Project>{b12702ad-abfb-343a-a199-8e24837244a3}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="RectItemWidget.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

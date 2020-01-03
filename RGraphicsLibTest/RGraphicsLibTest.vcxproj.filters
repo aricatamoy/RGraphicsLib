@@ -31,14 +31,23 @@
     <ClCompile Include="RGraphicsLibTest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RectItemWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="RGraphicsLibTest.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="RectItemWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="RGraphicsLibTest.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="RectItemWidget.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

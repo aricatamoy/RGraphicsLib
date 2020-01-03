@@ -1,5 +1,7 @@
 #include "RGraphicsLibTest.h"
 #include "RGraphicsItem.h"
+#include "RectItemWidget.h"
+#include "IRItemWidget.h"
 
 RGraphicsLibTest::RGraphicsLibTest(QWidget *parent)
 	: QMainWindow(parent)
@@ -9,7 +11,7 @@ RGraphicsLibTest::RGraphicsLibTest(QWidget *parent)
 	ui.graphicsView->setScene(m_pScene);
 
 	// m_pScene->addRect(QRectF(0, 0, 300, 300), QPen(QColor("#ff0000")));
-	RGrapihcsItem* pItem = new RGrapihcsItem(nullptr);
+	RGraphicsItem* pItem = new RGraphicsItem(nullptr);
 	pItem->setRect(0, 0, 300, 300);
 	pItem->setPen(QColor("#eee"));
 	pItem->setBrush(QColor("#eee"));
@@ -17,7 +19,7 @@ RGraphicsLibTest::RGraphicsLibTest(QWidget *parent)
 	m_pScene->addItem(pItem);
 
 	{
-		RGrapihcsItem* pItem = new RGrapihcsItem(nullptr);
+		RGraphicsItem* pItem = new RGraphicsItem(nullptr);
 		pItem->setRect(300, 300, 50, 50);
 		pItem->setPen(QColor("#eee"));
 		pItem->setBrush(QColor("#eee"));
@@ -25,6 +27,42 @@ RGraphicsLibTest::RGraphicsLibTest(QWidget *parent)
 		m_pScene->addItem(pItem);
 	}
 
-
+	initStackedWidget();
 	m_pScene->setSceneRect(0, 0, 500, 500);
+	connect(m_pScene, &QGraphicsScene::selectionChanged, this, &RGraphicsLibTest::slotSelectionChanged);
+}
+
+RGraphicsLibTest::~RGraphicsLibTest()
+{
+	m_pScene->disconnect();
+}
+
+void RGraphicsLibTest::slotSelectionChanged()
+{
+	ui.stackedWidget->setCurrentWidget(m_pEmptyPage);
+	QList<QGraphicsItem*> items = m_pScene->selectedItems();
+	if (!items.isEmpty())
+	{
+		QGraphicsItem* pItem = items[0];
+		QWidget* pWidget = m_mapTypePage.value(pItem->type(), m_pEmptyPage);
+		ui.stackedWidget->setCurrentWidget(pWidget);
+
+		RGraphicsItem* pRectItem = dynamic_cast<RGraphicsItem*>(pItem);
+		IRItemWidget* pItemWidget = dynamic_cast<IRItemWidget*>(pWidget);
+		if (pRectItem && pItemWidget)
+		{
+			pItemWidget->bindItem(pRectItem);
+		}
+	}
+}
+
+void RGraphicsLibTest::initStackedWidget()
+{
+	m_pEmptyPage = new QWidget(this);
+	m_pRectPage = new RectItemWidget(this);
+
+	ui.stackedWidget->addWidget(m_pEmptyPage);
+	ui.stackedWidget->addWidget(m_pRectPage);
+
+	m_mapTypePage[RGraphicsItem(nullptr).type()] = m_pRectPage;
 }

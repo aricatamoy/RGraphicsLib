@@ -5,7 +5,7 @@
 typedef void(*CustomPaintingFunc)(QPainter* painter, QRectF rect);
 
 class RGrapihcsItemPrivate;
-class RGRAPHICSLIB_EXPORT RGrapihcsItem : public QObject, public QGraphicsRectItem
+class RGRAPHICSLIB_EXPORT RGraphicsItem : public QObject, public QGraphicsRectItem
 {
 	Q_OBJECT
 
@@ -22,11 +22,13 @@ class RGRAPHICSLIB_EXPORT RGrapihcsItem : public QObject, public QGraphicsRectIt
 	};
 	
 public:
-	RGrapihcsItem(QGraphicsItem* parent);
-	~RGrapihcsItem();
+	RGraphicsItem(QGraphicsItem* parent);
+	~RGraphicsItem();
 
 	static void defaultPaintingFunc(QPainter* painter, QRectF rect);
 
+	enum { kType = RGraphicsItem::UserType + 1 };
+	int type() const;
 
 	void setActualRect(QRectF rect, bool bModifyRect = true);
 	QRectF actualRect() const;
