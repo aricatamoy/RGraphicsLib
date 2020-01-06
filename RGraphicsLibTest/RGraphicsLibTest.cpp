@@ -1,5 +1,6 @@
 #include "RGraphicsLibTest.h"
 #include "RGraphicsItem.h"
+#include "RGraphicsTextItem.h"
 #include "RectItemWidget.h"
 #include "IRItemWidget.h"
 #include <QDebug>
@@ -12,20 +13,32 @@ RGraphicsLibTest::RGraphicsLibTest(QWidget *parent)
 	ui.graphicsView->setScene(m_pScene);
 
 	// m_pScene->addRect(QRectF(0, 0, 300, 300), QPen(QColor("#ff0000")));
-	RGraphicsItem* pItem = new RGraphicsItem(nullptr);
-	pItem->setRect(0, 0, 300, 300);
-	pItem->setPen(QColor("#eee"));
-	pItem->setBrush(QColor("#eee"));
-	pItem->setItemLimitedInScene(true);
-	m_pScene->addItem(pItem);
-
 	{
 		RGraphicsItem* pItem = new RGraphicsItem(nullptr);
-		pItem->setRect(300, 300, 50, 50);
+		pItem->setRect(0, 0, 300, 300);
 		pItem->setPen(QColor("#eee"));
 		pItem->setBrush(QColor("#eee"));
 		pItem->setItemLimitedInScene(true);
 		m_pScene->addItem(pItem);
+	}
+
+	{
+		RGraphicsTextItem* pItem = new RGraphicsTextItem(nullptr);
+		pItem->setRect(300, 300, 284, 107);
+		pItem->setPen(QColor("#eee"));
+		pItem->setBrush(QColor("#eee"));
+		pItem->setItemLimitedInScene(true);
+		pItem->setText("Hello world!");
+		pItem->setTextAlignment(Qt::AlignCenter);
+		pItem->setTextPen(QPen(QColor("#ffff00")));
+		QFont font;
+		font.setBold(true);
+		font.setPixelSize(40);
+		pItem->setFont(font);
+		m_pScene->addItem(pItem);
+
+		pItem->setShadowParameter(5, 5, 100, "#2f00ff00");
+		pItem->setShadowEnabled(true);
 	}
 
 	initStackedWidget();
