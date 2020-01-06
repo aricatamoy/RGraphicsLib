@@ -96,10 +96,12 @@
     <ClCompile Include="RGraphicsItem.cpp" />
     <ClCompile Include="RGraphicsLib.cpp" />
     <ClCompile Include="RGraphicsScene.cpp" />
+    <ClCompile Include="RGraphicsTextItem.cpp" />
     <ClCompile Include="RGraphicsView.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\IRData.h" />
+    <ClInclude Include="include\RGraphicsTextItem.h" />
     <QtMoc Include="include\RGraphicsItem.h" />
     <QtMoc Include="include\IRItemWidget.h" />
     <ClInclude Include="include\RGraphicsLib.h" />

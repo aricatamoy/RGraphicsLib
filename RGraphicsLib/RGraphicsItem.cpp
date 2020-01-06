@@ -168,14 +168,17 @@ QVariant RGraphicsItem::itemChange(QGraphicsItem::GraphicsItemChange change, con
 
 void RGraphicsItem::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-	setCursor((Qt::CursorShape)scMapBorderAreaCursor.value(borderAreaHitTest(event->scenePos())));
-	if (isSelected())
+	if (event->button() == Qt::LeftButton)
 	{
-		m_nLastBorderArea = borderAreaHitTest(event->scenePos());
-		m_ptLastPosition = event->scenePos();
-		setFlag(ItemIsMovable, false);
+		setCursor((Qt::CursorShape)scMapBorderAreaCursor.value(borderAreaHitTest(event->scenePos())));
+		if (isSelected())
+		{
+			m_nLastBorderArea = borderAreaHitTest(event->scenePos());
+			m_ptLastPosition = event->scenePos();
+			setFlag(ItemIsMovable, false);
+		}
+		grabMouse();
 	}
-	grabMouse();
 	return QGraphicsRectItem::mousePressEvent(event);
 }
 
@@ -257,9 +260,12 @@ void RGraphicsItem::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 
 void RGraphicsItem::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-	m_nLastBorderArea = kBorderAreaCenter;
-	m_ptLastPosition = QPointF(0, 0);
-	ungrabMouse();
+	if (event->button() == Qt::LeftButton)
+	{
+		m_nLastBorderArea = kBorderAreaCenter;
+		m_ptLastPosition = QPointF(0, 0);
+		ungrabMouse();
+	}
 	return QGraphicsRectItem::mouseReleaseEvent(event);
 }
 
